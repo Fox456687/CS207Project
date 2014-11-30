@@ -1,0 +1,92 @@
+const int delayTime = 10;
+const int rightButton = 8;
+const int leftButton = 9;
+const int accelerateButton = 10;
+const int powerSwitch = 11;
+const int liftDial = 0;
+const int thrustDial = 1;
+int rightButtonState = 0;
+int leftButtonState = 0;
+int accelerateButtonState = 0;
+int powerSwitchState = 0;
+int liftState = 0;
+int thrustState = 0;
+void setup()
+{
+Serial.begin(9600);
+pinMode(rightButton, INPUT);
+pinMode(leftButton, INPUT);
+pinMode(accelerateButton, INPUT);
+pinMode(powerSwitch, INPUT);
+pinMode(liftDial, INPUT);
+pinMode(thrustDial, INPUT);
+}
+void loop()
+{
+if(digitalRead(rightButton) == HIGH && rightButtonState == LOW)
+{
+Serial.println("R1");
+rightButtonState = HIGH;
+delay(delayTime);
+}
+else if(digitalRead(rightButton) == LOW && rightButtonState == HIGH)
+{
+Serial.println("R0");
+rightButtonState = LOW;
+delay(delayTime);
+}
+if(digitalRead(leftButton) == HIGH && leftButtonState == LOW)
+{
+Serial.println("L1");
+leftButtonState = HIGH;
+delay(delayTime);
+}
+else if(digitalRead(leftButton) == LOW && leftButtonState == HIGH)
+{
+Serial.println("L0");
+leftButtonState = LOW;
+delay(delayTime);
+}
+if(digitalRead(accelerateButton) == HIGH && accelerateButtonState == LOW)
+{
+Serial.println("A1");
+accelerateButtonState = HIGH;
+delay(delayTime);
+}
+else if(digitalRead(accelerateButton) == LOW && accelerateButtonState == HIGH)
+{
+Serial.println("A0");
+accelerateButtonState = LOW;
+delay(delayTime);
+}
+if(digitalRead(powerSwitch) == HIGH && powerSwitchState == LOW)
+{
+Serial.println("P1");
+powerSwitchState = HIGH;
+delay(delayTime);
+}
+else if(digitalRead(powerSwitch) == LOW)
+{
+Serial.println("P0");
+powerSwitchState = LOW;
+delay(delayTime);
+}
+int lift = analogRead(liftDial);
+if(lift + 5 < liftState || lift - 5 > liftState)
+{
+Serial.print("B");
+Serial.println(lift);
+liftState = lift;
+delay(delayTime);
+}
+int thrust = analogRead(thrustDial);
+if(thrust + 5 < thrustState || thrust - 5 > thrustState)
+{
+Serial.print("T");
+Serial.println(thrust);
+thrustState = thrust;
+delay(delayTime);
+}
+Serial.println("C1");
+delay(delayTime);
+}
