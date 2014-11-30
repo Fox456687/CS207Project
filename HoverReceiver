@@ -1,0 +1,107 @@
+#include <elapsedMillis.h>
+#include <Servo.h>
+
+Servo liftESC;
+
+const int led = 13;
+
+int power = 0;
+int lift = 0;
+int liftSet = 0;
+int liftSpeed = 1;
+
+elapsedMillis connectCheck;
+elapsedMillis liftTimer;
+
+const int connectCheckEnd = 2000;
+const int liftTime = 1;
+
+void setup() {
+  Serial.begin(9600);
+  
+  liftESC.attach(8);
+  
+  pinMode(led, OUTPUT);
+}
+ 
+void loop() {
+  
+  if (Serial.available()) {
+    
+    char command = Serial.read();
+    
+    if(command == 'P')
+    {
+     
+       power = Serial.parseInt();
+      
+    }
+   
+    if(command == 'B')
+    {
+     
+       liftSet = Serial.parseInt();
+      
+    }
+    
+    if(command == 'C')
+    {
+     
+       int con = Serial.parseInt();
+       
+       if(con == 1)
+       {
+      
+         connectCheck = 0;
+      
+       }
+      
+    }
+    
+  }
+
+ if(power == 0)
+ {
+  
+    digitalWrite(led, LOW);
+   
+ }
+ else if (power == 1)
+ {
+  
+    digitalWrite(led, HIGH);
+   
+ }
+ 
+ if(connectCheck > connectCheckEnd)
+ {
+ 
+   power = 0;
+   
+ }
+ 
+ if(liftTimer > liftTime)
+ {
+  
+  liftTimer = 0;
+  
+  if(lift > liftSet)
+  {
+   
+   lift--;
+    
+  }
+  else if(lift < liftSet)
+  {
+   
+   lift++;
+    
+  }
+   
+ }
+ 
+ int liftMap = map(lift, 0, 1023, 0, 179);
+  
+ liftESC.write(liftMap);
+  
+}
