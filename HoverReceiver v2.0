@@ -1,0 +1,158 @@
+#include <elapsedMillis.h>
+#include <Servo.h>
+Servo liftESC;
+Servo throttleESC;
+Servo rightRudder;
+Servo leftRudder;
+
+int rudder = 90;
+
+const int led = 13;
+int power = 0;
+int lift = 0;
+int throttle = 0;
+int liftSet = 0;
+int throttleSet = 0;
+int liftSpeed = 1;
+int throttleSpeed = 1;
+elapsedMillis connectCheck;
+elapsedMillis liftTimer;
+elapsedMillis throttleTimer;
+elapsedMillis rudderTimer;
+const int connectCheckEnd = 2000;
+const int liftTime = 1;
+const int rudderTime = 5;
+const int throttleTime = 1;
+int leftButton = 0;
+int rightButton = 0;
+void setup() {
+Serial.begin(9600);
+liftESC.attach(8);
+throttleESC.attach(9);
+rightRudder.attach(10);
+pinMode(led, OUTPUT);
+}
+void loop() {
+if (Serial.available()) {
+char command = Serial.read();
+if(command == 'P')
+{
+power = Serial.parseInt();
+}
+if(command == 'B')
+{
+liftSet = Serial.parseInt();
+}
+if(command == 'T')
+{
+ throttleSet = Serial.parseInt(); 
+}
+if(command == 'L')
+{
+leftButton = Serial.parseInt();
+}
+if(command == 'R')
+{
+ rightButton = Serial.parseInt();
+}
+if(command == 'C')
+{
+int con = Serial.parseInt();
+if(con == 1)
+{
+connectCheck = 0;
+}
+}
+}
+if(power == 0)
+{
+digitalWrite(led, LOW);
+liftSet = 0;
+throttleSet = 0;
+ if(rudder > 90)
+ {
+  rudder--; 
+ }
+ 
+ if(rudder < 90)
+ {
+  rudder++; 
+ }
+}
+else if (power == 1)
+{
+digitalWrite(led, HIGH);
+}
+if(connectCheck > connectCheckEnd)
+{
+power = 0;
+}
+if(liftTimer > liftTime)
+{
+liftTimer = 0;
+if(lift > liftSet)
+{
+lift--;
+}
+else if(lift < liftSet)
+{
+lift++;
+}
+}
+int liftMap = map(lift, 0, 1023, 20, 179);
+liftESC.write(liftMap);
+
+if(throttleTimer > throttleTime)
+{
+throttleTimer = 0;
+if(throttle > throttleSet)
+{
+throttle--;
+}
+else if(throttle < throttleSet)
+{
+throttle++;
+}
+}
+int throttleMap = map(throttle, 0, 1023, 20, 179);
+throttleESC.write(throttleMap);
+if(rudderTimer > rudderTime && power == 1)
+{
+
+  rudderTimer = 0;
+  
+if(rightButton == 1 && rudder < 130)
+{
+ rudder++; 
+}
+
+if(leftButton == 1 && rudder > 50)
+{
+ rudder--; 
+}
+
+
+if(rightButton == 0 && leftButton == 0)
+{
+ 
+ if(rudder > 90)
+ {
+  rudder--; 
+ }
+ 
+ if(rudder < 90)
+ {
+  rudder++; 
+ }
+
+}
+
+
+ 
+}
+
+rightRudder.write(rudder);
+leftRudder.write(rudder);
+}
+
+
