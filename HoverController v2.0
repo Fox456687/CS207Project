@@ -1,157 +1,92 @@
-#include <elapsedMillis.h>
-#include <Servo.h>
-Servo liftESC;
-Servo throttleESC;
-Servo rightRudder;
-Servo leftRudder;
-
-int rudder = 90;
-
-const int led = 13;
-int power = 0;
-int lift = 0;
-int throttle = 0;
-int liftSet = 0;
-int throttleSet = 0;
-int liftSpeed = 1;
-int throttleSpeed = 1;
-elapsedMillis connectCheck;
-elapsedMillis liftTimer;
-elapsedMillis throttleTimer;
-elapsedMillis rudderTimer;
-const int connectCheckEnd = 2000;
-const int liftTime = 1;
-const int rudderTime = 5;
-const int throttleTime = 1;
-int leftButton = 0;
-int rightButton = 0;
-void setup() {
+const int delayTime = 10;
+const int rightButton = 8;
+const int leftButton = 9;
+const int accelerateButton = 10;
+const int powerSwitch = 11;
+const int liftDial = 0;
+const int thrustDial = 1;
+int rightButtonState = 0;
+int leftButtonState = 0;
+int accelerateButtonState = 0;
+int powerSwitchState = 0;
+int liftState = 0;
+int thrustState = 0;
+void setup()
+{
 Serial.begin(9600);
-liftESC.attach(8);
-throttleESC.attach(9);
-rightRudder.attach(10);
-leftRudder.attach(11);
-pinMode(led, OUTPUT);
+pinMode(rightButton, INPUT);
+pinMode(leftButton, INPUT);
+pinMode(accelerateButton, INPUT);
+pinMode(powerSwitch, INPUT);
+pinMode(liftDial, INPUT);
+pinMode(thrustDial, INPUT);
 }
-void loop() {
-if (Serial.available()) {
-char command = Serial.read();
-if(command == 'P')
+void loop()
 {
-power = Serial.parseInt();
-}
-if(command == 'B')
+if(digitalRead(rightButton) == HIGH && rightButtonState == LOW)
 {
-liftSet = Serial.parseInt();
+Serial.println("R1");
+rightButtonState = HIGH;
+delay(delayTime);
 }
-if(command == 'T')
+else if(digitalRead(rightButton) == LOW && rightButtonState == HIGH)
 {
- throttleSet = Serial.parseInt(); 
+Serial.println("R0");
+rightButtonState = LOW;
+delay(delayTime);
 }
-if(command == 'L')
+if(digitalRead(leftButton) == HIGH && leftButtonState == LOW)
 {
-leftButton = Serial.parseInt();
+Serial.println("L1");
+leftButtonState = HIGH;
+delay(delayTime);
 }
-if(command == 'R')
+else if(digitalRead(leftButton) == LOW && leftButtonState == HIGH)
 {
- rightButton = Serial.parseInt();
+Serial.println("L0");
+leftButtonState = LOW;
+delay(delayTime);
 }
-if(command == 'C')
+if(digitalRead(accelerateButton) == HIGH && accelerateButtonState == LOW)
 {
-int con = Serial.parseInt();
-if(con == 1)
+Serial.println("A1");
+accelerateButtonState = HIGH;
+delay(delayTime);
+}
+else if(digitalRead(accelerateButton) == LOW && accelerateButtonState == HIGH)
 {
-connectCheck = 0;
+Serial.println("A0");
+accelerateButtonState = LOW;
+delay(delayTime);
 }
-}
-}
-if(power == 0)
+if(digitalRead(powerSwitch) == HIGH && powerSwitchState == LOW)
 {
-digitalWrite(led, LOW);
-liftSet = 0;
-throttleSet = 0;
- if(rudder > 90)
- {
-  rudder--; 
- }
- 
- if(rudder < 90)
- {
-  rudder++; 
- }
+Serial.println("P1");
+powerSwitchState = HIGH;
+delay(delayTime);
 }
-else if (power == 1)
+else if(digitalRead(powerSwitch) == LOW)
 {
-digitalWrite(led, HIGH);
+Serial.println("P0");
+powerSwitchState = LOW;
+delay(delayTime);
 }
-if(connectCheck > connectCheckEnd)
+int lift = analogRead(liftDial);
+if(lift + 5 < liftState || lift - 5 > liftState)
 {
-power = 0;
+Serial.print("B");
+Serial.println(lift);
+liftState = lift;
+delay(delayTime);
 }
-if(liftTimer > liftTime)
+int thrust = analogRead(thrustDial);
+if(thrust + 5 < thrustState || thrust - 5 > thrustState)
 {
-liftTimer = 0;
-if(lift > liftSet)
-{
-lift--;
+Serial.print("T");
+Serial.println(thrust);
+thrustState = thrust;
+delay(delayTime);
 }
-else if(lift < liftSet)
-{
-lift++;
-}
-}
-int liftMap = map(lift, 0, 1023, 20, 179);
-liftESC.write(liftMap);
-
-if(throttleTimer > throttleTime)
-{
-throttleTimer = 0;
-if(throttle > throttleSet)
-{
-throttle--;
-}
-else if(throttle < throttleSet)
-{
-throttle++;
-}
-}
-int throttleMap = map(throttle, 0, 1023, 20, 179);
-throttleESC.write(throttleMap);
-if(rudderTimer > rudderTime && power == 1)
-{
-
-  rudderTimer = 0;
-  
-if(rightButton == 1 && rudder < 130)
-{
- rudder++; 
-}
-
-if(leftButton == 1 && rudder > 50)
-{
- rudder--; 
-}
-
-
-if(rightButton == 0 && leftButton == 0)
-{
- 
- if(rudder > 90)
- {
-  rudder--; 
- }
- 
- if(rudder < 90)
- {
-  rudder++; 
- }
-
-}
-
-
- 
-}
-
-rightRudder.write(rudder+1);
-leftRudder.write(rudder);
+Serial.println("C1");
+delay(delayTime);
 }
