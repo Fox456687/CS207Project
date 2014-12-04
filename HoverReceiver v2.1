@@ -29,55 +29,65 @@ int rightButton = 0;
 int accellerateButton = 0;
 const int liftMin = 0;
 const int throttleMin = 0;
+
 void setup() {
-Serial.begin(9600);
-liftESC.attach(8);
-throttleESC.attach(9);
-rightRudder.attach(10);
-leftRudder.attach(11);
-pinMode(led, OUTPUT);
+ Serial.begin(9600);
+ liftESC.attach(8);
+ throttleESC.attach(9);
+ rightRudder.attach(10);
+ leftRudder.attach(11);
+ pinMode(led, OUTPUT);
 }
+
 void loop() {
-if (Serial.available()) {
-char command = Serial.read();
-if(command == 'P')
+
+if (Serial.available()) 
 {
-power = Serial.parseInt();
-}
-if(command == 'B')
-{
-liftSet = Serial.parseInt();
-}
-if(command == 'T')
-{
- throttleSet = Serial.parseInt(); 
-}
-if(command == 'L')
-{
-leftButton = Serial.parseInt();
-}
-if(command == 'R')
-{
- rightButton = Serial.parseInt();
-}
-if(command == 'A')
-{
- accellerateButton = Serial.parseInt();
-}
-if(command == 'C')
-{
-int con = Serial.parseInt();
-if(con == 1)
-{
-connectCheck = 0;
-}
-}
+ char command = Serial.read();
+ if(command == 'P')
+ {
+ power = Serial.parseInt();
+ }
+ if(command == 'B')
+ {
+ liftSet = Serial.parseInt();
+ }
+ if(command == 'T')
+ {
+  throttleSet = Serial.parseInt(); 
+ }
+ if(command == 'L')
+ {
+ leftButton = Serial.parseInt();
+ }
+ if(command == 'R')
+ {
+  rightButton = Serial.parseInt();
+ }
+ if(command == 'A')
+ {
+  accellerateButton = Serial.parseInt();
+ }
+ if(command == 'C')
+ {
+
+  int con = Serial.parseInt();
+  
+  if(con == 1)
+  {
+   connectCheck = 0;
+  }
+  
+ }
+ 
 }
 if(power == 0)
 {
-digitalWrite(led, LOW);
-liftSet = 0;
-throttleSet = 0;
+
+ digitalWrite(led, LOW);
+ liftSet = 0;
+ throttleSet = 0;
+
  if(rudder > 90)
  {
   rudder--; 
@@ -87,95 +97,102 @@ throttleSet = 0;
  {
   rudder++; 
  }
+ 
 }
 else if (power == 1)
 {
 digitalWrite(led, HIGH);
 }
-if(connectCheck > connectCheckEnd)
-{
-power = 0;
-}
-if(liftTimer > liftTime)
-{
-liftTimer = 0;
-if(lift > liftSet)
-{
-lift--;
-}
-else if(lift < liftSet)
-{
-lift++;
-}
-}
-int liftMap = map(lift, 0, 1023, 28, 179);
-liftESC.write(liftMap);
-
-if(throttleTimer > throttleTime)
-{
-throttleTimer = 0;
-if(throttle > throttleSet && accellerateButton == 0)
-{
-throttle--;
-}
-else if(throttle < throttleSet && accellerateButton == 0)
-{
-throttle++;
-}
-else if(throttle < throttleSet + boost && throttle < 178 && accellerateButton == 1)
-{
- throttle++; 
-}
-}
-
-int throttleMap = map(throttle, 0, 1023, 55, 179);
-throttleESC.write(throttleMap);
-
-if(rudderTimer > rudderTime && power == 1)
-{
-
-  rudderTimer = 0;
-  
-if(rightButton == 1 && rudder < 130)
-{
- rudder++; 
-}
-
-if(leftButton == 1 && rudder > 50)
-{
- rudder--; 
-}
-
-
-if(rightButton == 0 && leftButton == 0)
-{
+ if(connectCheck > connectCheckEnd)
+ {
+  power = 0;
+ }
  
+ if(liftTimer > liftTime)
+ {
+ 
+  liftTimer = 0;
+  
+  if(lift > liftSet)
+  {
+  lift--;
+  }
+  else if(lift < liftSet)
+  {
+  lift++;
+  }
+  
+ }
+ 
+ int liftMap = map(lift, 0, 1023, 28, 179);
+ liftESC.write(liftMap);
+
+ if(throttleTimer > throttleTime)
+ {
+ 
+  throttleTimer = 0;
+  
+  if(throttle > throttleSet && accellerateButton == 0)
+  {
+   throttle--;
+  }
+  else if(throttle < throttleSet && accellerateButton == 0)
+  {
+   throttle++;
+  }
+  else if(throttle < throttleSet + boost && throttle < 178 && accellerateButton == 1)
+  {
+   throttle++; 
+  }
+  
+ }
+
+ int throttleMap = map(throttle, 0, 1023, 55, 179);
+ throttleESC.write(throttleMap);
+
+ if(rudderTimer > rudderTime && power == 1)
+ {
+ 
+    rudderTimer = 0;
+    
+  if(rightButton == 1 && rudder < 130)
+  {
+   rudder++; 
+  }
+  
+  if(leftButton == 1 && rudder > 50)
+  {
+   rudder--; 
+  }
+
+  if(rightButton == 0 && leftButton == 0)
+  {
+   
+   if(rudder > 90)
+   {
+    rudder--; 
+   }
+   
+   if(rudder < 90)
+   {
+    rudder++; 
+   }
+  
+  }
+ 
+ }
+
  if(rudder > 90)
  {
-  rudder--; 
+   rightRudder.write(rudder*1.11 + 5);
  }
- 
- if(rudder < 90)
+ else
  {
-  rudder++; 
+   rightRudder.write(rudder + 5);
  }
 
-}
+ leftRudder.write(rudder);
 
-
- 
-}
-
-if(rudder > 90)
-{
-  rightRudder.write(rudder*1.11 + 5);
-}
-else
-{
-  rightRudder.write(rudder + 5);
-}
-
-leftRudder.write(rudder);
 }
 
 
